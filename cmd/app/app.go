@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/deyuro/zulip-combats/internal/config"
+	"github.com/deyuro/zulip-combats/internal/zulip"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"
@@ -10,12 +13,20 @@ import (
 )
 
 func app() error {
-	appCtx, cancel := context.WithCancel(context.Background())
 
-	var daemon bool
-	flag.BoolVar(&daemon, "boolvar", false, "placeholde for flag")
+	var cfgFile string
+
+	flag.StringVar(&cfgFile, "config", "config.yml", "config file path")
 	flag.Parse()
 
+	cfg, err := config.Load(cfgFile)
+	if err != nil {
+		return errors.WithMessage(err, "failed to load configuration")
+	}
+
+	appCtx, cancel := context.WithCancel(context.Background())
+
+	bot := zulip.NewBot(cfg.Zulip.Bot.Email, cfg.Zulip.Bot.Key, cfg.Zulip.Entrypoint, &Client{})
 	errChan := make(chan error)
 	go func() {
 		handleSIGINT()
@@ -23,7 +34,7 @@ func app() error {
 	}()
 
 	go func() {
-		errChan <- run(cancel, daemon)
+		errChan <- run(cancel, bot)
 	}()
 	select {
 	case err := <-errChan:
@@ -33,7 +44,7 @@ func app() error {
 	}
 }
 
-func run(cancel context.CancelFunc, daemon bool) error {
+func run(cancel context.CancelFunc, bot *zulip.Bot) error {
 	return nil
 }
 
