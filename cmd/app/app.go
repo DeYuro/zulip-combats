@@ -7,6 +7,7 @@ import (
 	"github.com/deyuro/zulip-combats/internal/zulip"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,7 +27,7 @@ func app() error {
 
 	appCtx, cancel := context.WithCancel(context.Background())
 
-	bot := zulip.NewBot(cfg.Zulip.Bot.Email, cfg.Zulip.Bot.Key, cfg.Zulip.Entrypoint, &Client{})
+	bot := zulip.NewBot(cfg.Zulip.Bot.Email, cfg.Zulip.Bot.Key, cfg.Zulip.Entrypoint, &http.Client{})
 	errChan := make(chan error)
 	go func() {
 		handleSIGINT()
@@ -45,6 +46,15 @@ func app() error {
 }
 
 func run(cancel context.CancelFunc, bot *zulip.Bot) error {
+
+	streamList, err := bot.GetStreams()
+
+	if err != nil {
+		return err
+	}
+
+	_ = streamList
+
 	return nil
 }
 

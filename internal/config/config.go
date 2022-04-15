@@ -11,7 +11,7 @@ type Config struct {
 
 type Service struct {
 	Bot        Bot    `required:"true" yaml:"bot"`
-	Entrypoint string `required:"true" yaml:"bot"`
+	Entrypoint string `required:"true" yaml:"entrypoint"`
 }
 
 type Bot struct {
