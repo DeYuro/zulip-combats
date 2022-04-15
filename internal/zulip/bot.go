@@ -20,7 +20,7 @@ type Doer interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-func (b *Bot) request(method, endpoint, body string) (*http.Request, error) {
+func (b *Bot) request(method verb, endpoint, body string) (*http.Request, error) {
 	url := b.entrypoint + endpoint
 	req, err := http.NewRequest(method, url, strings.NewReader(body))
 	if err != nil {
