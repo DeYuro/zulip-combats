@@ -17,7 +17,7 @@ func (b *Bot) GetStreams() ([]string, error) {
 		return nil, err
 	}
 
-	var sj StreamJSON
+	var sj GetAllStreamsResponse
 	err = json.Unmarshal(body, &sj)
 	if err != nil {
 		return nil, err
@@ -29,4 +29,25 @@ func (b *Bot) GetStreams() ([]string, error) {
 	}
 
 	return streams, nil
+}
+
+func (b *Bot) RegisterEventQueue() (*RegisterEventQueueResponse, error) {
+	resp, err := b.registerEventQueue()
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var response *RegisterEventQueueResponse
+
+	err = json.Unmarshal(body, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
