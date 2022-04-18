@@ -30,9 +30,12 @@ func (b *Bot) GetStreams() ([]string, error) {
 
 	return streams, nil
 }
+func (b *Bot) RegisterEventQueuePrivate() (*Queue, error) {
+	return b.RegisterEventQueue(nil, NarrowPrivate)
+}
 
-func (b *Bot) RegisterEventQueue() (*RegisterEventQueueResponse, error) {
-	resp, err := b.registerEventQueue()
+func (b *Bot) RegisterEventQueue(eventList []EventType, narrow Narrow) (*Queue, error) {
+	resp, err := b.registerEventQueue(eventList, narrow)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +45,17 @@ func (b *Bot) RegisterEventQueue() (*RegisterEventQueueResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	var response *RegisterEventQueueResponse
 
-	err = json.Unmarshal(body, response)
+	var queue Queue
+
+	err = json.Unmarshal(body, &queue)
 	if err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return &queue, nil
+}
+
+func (b *Bot) GetEventChan() {
+
 }

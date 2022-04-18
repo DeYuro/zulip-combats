@@ -55,6 +55,9 @@ func run(cancel context.CancelFunc, bot *zulip.Bot) error {
 
 	_ = streamList
 
+	queue, err := bot.RegisterEventQueuePrivate()
+
+	_ = queue
 	return nil
 }
 

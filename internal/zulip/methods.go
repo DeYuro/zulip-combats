@@ -14,7 +14,7 @@ func (b *Bot) getStreamList() (*http.Response, error) {
 	return b.client.Do(req)
 }
 
-func (b *Bot[T]) registerEventQueue(eventTypes []EventType, narrow Narrow) (*http.Response, error) {
+func (b *Bot) registerEventQueue(eventTypes []EventType, narrow Narrow) (*http.Response, error) {
 	query := `event_types=["message"]`
 
 	if len(eventTypes) != 0 {
