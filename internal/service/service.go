@@ -10,17 +10,13 @@ func NewService(bot *zulip.Bot) *Service {
 	return &Service{bot: bot}
 }
 
-func Run() error {
+func (s *Service) Run() error {
 
-	for {
-
-	}
-}
-
-func (s *Service) getMessages() error {
-	queue, err := s.bot.RegisterEventQueuePrivate()
-	if err != nil {
-		return err
+	c, cancel := s.bot.GetEventChan()
+	defer cancel()
+	for e := range c {
+		println(e.Content)
 	}
 
+	return nil
 }
