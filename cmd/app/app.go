@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/deyuro/zulip-combats/internal/config"
+	"github.com/deyuro/zulip-combats/internal/service"
 	"github.com/deyuro/zulip-combats/internal/zulip"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -46,6 +47,8 @@ func app() error {
 }
 
 func run(cancel context.CancelFunc, bot *zulip.Bot) error {
+
+	src := service.NewService(bot)
 
 	streamList, err := bot.GetStreams()
 
