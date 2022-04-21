@@ -48,19 +48,20 @@ func app() error {
 
 func run(cancel context.CancelFunc, bot *zulip.Bot) error {
 
+	q, err := bot.RegisterEventQueuePrivate()
+	if err != nil {
+		return err
+	}
+	bot.SetQueue(q)
+
 	src := service.NewService(bot)
 
-	streamList, err := bot.GetStreams()
+	err = src.Run()
 
 	if err != nil {
 		return err
 	}
-
-	_ = streamList
-
-	queue, err := bot.RegisterEventQueuePrivate()
-
-	_ = queue
+	
 	return nil
 }
 
