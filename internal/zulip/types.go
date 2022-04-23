@@ -1,5 +1,7 @@
 package zulip
 
+import "encoding/json"
+
 type verb = string
 
 const (
@@ -14,6 +16,7 @@ const (
 	Subscriptions EventType = "subscriptions"
 	RealmUser     EventType = "realm_user"
 	Pointer       EventType = "pointer"
+	Heartbeat     EventType = "heartbeat"
 )
 
 type Narrow string
@@ -46,6 +49,12 @@ type Queue struct {
 	LastEventID       int    `json:"last_event_id"`
 }
 
+type EventsResponse struct {
+	Result  string          `json:"result"`
+	Msg     string          `json:"msg"`
+	Events  json.RawMessage `json:"events"`
+	QueueID string          `json:"queue_id"`
+}
 type EventMessage struct {
 	AvatarURL       string        `json:"avatar_url"`
 	Client          string        `json:"client"`

@@ -67,6 +67,17 @@ func (b *Bot) GetEvents() ([]EventMessage, error) {
 	if err != nil {
 		return nil, err
 	}
+	var res EventsResponse
+	err = json.Unmarshal(body, &res)
+	rawResponse := map[string]json.RawMessage{}
+	err = json.Unmarshal(body, &rawResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
 
 	msgs, err := b.parseEventMessages(body)
 	if err != nil {
@@ -89,6 +100,18 @@ func (b *Bot) parseEventMessages(rawEventResponse []byte) ([]EventMessage, error
 		return nil, err
 	}
 
+	var eventType string
+
+	err = json.Unmarshal(events[0]["type"], &eventType)
+	if err != nil {
+		return nil, err
+	}
+	t := EventType(eventType)
+
+	switch t {
+	case Heartbeat:
+		return nil, err
+	}
 	messages := []EventMessage{}
 	newLastEventID := 0
 	for _, event := range events {
