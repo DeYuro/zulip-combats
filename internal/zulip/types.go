@@ -1,7 +1,5 @@
 package zulip
 
-import "encoding/json"
-
 type verb = string
 
 const (
@@ -9,14 +7,21 @@ const (
 	POST verb = "POST"
 )
 
-type EventType string
+type QueueEventType string
 
 const (
-	Messages      EventType = "messages"
-	Subscriptions EventType = "subscriptions"
-	RealmUser     EventType = "realm_user"
-	Pointer       EventType = "pointer"
-	Heartbeat     EventType = "heartbeat"
+	MessageQueueType   QueueEventType = "message"
+	HeartbeatQueueType QueueEventType = "heartbeat"
+)
+
+type RegisterEventType string
+
+const (
+	Messages      RegisterEventType = "messages"
+	Subscriptions RegisterEventType = "subscriptions"
+	RealmUser     RegisterEventType = "realm_user"
+	Pointer       RegisterEventType = "pointer"
+	Heartbeat     RegisterEventType = "heartbeat"
 )
 
 type Narrow string
@@ -49,27 +54,27 @@ type Queue struct {
 	LastEventID       int    `json:"last_event_id"`
 }
 
-type EventsResponse struct {
-	Result  string          `json:"result"`
-	Msg     string          `json:"msg"`
-	Events  json.RawMessage `json:"events"`
-	QueueID string          `json:"queue_id"`
+type Event struct {
+	ID      int
+	Type    QueueEventType
+	Message EventMessage
 }
+
 type EventMessage struct {
-	AvatarURL       string        `json:"avatar_url"`
-	Client          string        `json:"client"`
-	Content         string        `json:"content"`
-	ContentType     string        `json:"content_type"`
-	GravatarHash    string        `json:"gravatar_hash"`
+	AvatarURL       string        `json:"avatar_url,omitempty"`
+	Client          string        `json:"client,omitempty"`
+	Content         string        `json:"content,omitempty"`
+	ContentType     string        `json:"content_type,omitempty"`
+	GravatarHash    string        `json:"gravatar_hash,omitempty"`
 	ID              int           `json:"id"`
-	RecipientID     int           `json:"recipient_id"`
-	SenderDomain    string        `json:"sender_domain"`
-	SenderEmail     string        `json:"sender_email"`
-	SenderFullName  string        `json:"sender_full_name"`
-	SenderID        int           `json:"sender_id"`
-	SenderShortName string        `json:"sender_short_name"`
-	Subject         string        `json:"subject"`
-	SubjectLinks    []interface{} `json:"subject_links"`
-	Timestamp       int           `json:"timestamp"`
+	RecipientID     int           `json:"recipient_id,omitempty"`
+	SenderDomain    string        `json:"sender_domain,omitempty"`
+	SenderEmail     string        `json:"sender_email,omitempty"`
+	SenderFullName  string        `json:"sender_full_name,omitempty"`
+	SenderID        int           `json:"sender_id,omitempty"`
+	SenderShortName string        `json:"sender_short_name,omitempty"`
+	Subject         string        `json:"subject,omitempty"`
+	SubjectLinks    []interface{} `json:"subject_links,omitempty"`
+	Timestamp       int           `json:"timestamp,omitempty"`
 	Type            string        `json:"type"`
 }

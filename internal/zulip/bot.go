@@ -1,6 +1,7 @@
 package zulip
 
 import (
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 )
@@ -11,18 +12,20 @@ type Bot struct {
 	entrypoint string
 	client     Doer
 	queue      *Queue
+	logger     logrus.FieldLogger
 }
 
 func (b *Bot) SetQueue(queue *Queue) {
 	b.queue = queue
 }
 
-func NewBot(email string, key string, entrypoint string, client Doer) *Bot {
+func NewBot(email string, key string, entrypoint string, client Doer, logger logrus.FieldLogger) *Bot {
 	bot := &Bot{
 		email:      email,
 		key:        key,
 		entrypoint: entrypoint,
 		client:     client,
+		logger:     logger,
 	}
 	return bot
 }
@@ -60,11 +63,18 @@ func (b *Bot) GetEventChan() (chan EventMessage, func()) {
 			ems, err := b.GetEvents()
 
 			if err != nil {
-				// TODO: handle unknown error
-				return
+				b.logger.WithError(err).Debug("Can not parse events")
+				continue
 			}
+
 			for _, em := range ems {
-				out <- em
+				switch em.Type {
+				// skip everything except Messages
+				case HeartbeatQueueType:
+					b.logger.Debug("Heartbeat")
+				case MessageQueueType:
+					out <- em.Message
+				}
 			}
 		}
 	}()

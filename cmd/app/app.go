@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/deyuro/zulip-combats/internal/config"
 	"github.com/deyuro/zulip-combats/internal/service"
 	"github.com/deyuro/zulip-combats/internal/zulip"
@@ -11,6 +12,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"runtime"
 	"syscall"
 )
 
@@ -27,8 +30,8 @@ func app() error {
 	}
 
 	appCtx, cancel := context.WithCancel(context.Background())
-
-	bot := zulip.NewBot(cfg.Zulip.Bot.Email, cfg.Zulip.Bot.Key, cfg.Zulip.Entrypoint, &http.Client{})
+	logger := setupLogger()
+	bot := zulip.NewBot(cfg.Zulip.Bot.Email, cfg.Zulip.Bot.Key, cfg.Zulip.Entrypoint, &http.Client{}, logger)
 	errChan := make(chan error)
 	go func() {
 		handleSIGINT()
@@ -61,8 +64,27 @@ func run(cancel context.CancelFunc, bot *zulip.Bot) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
+}
+func setupLogger() *logrus.Logger {
+	logger := logrus.New()
+	logger.ReportCaller = false
+
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableColors:    true,
+		DisableTimestamp: false,
+		FullTimestamp:    true,
+		TimestampFormat:  "2006-01-02 15:04:05",
+		QuoteEmptyFields: true,
+		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			file, line := frame.Func.FileLine(frame.PC)
+			return frame.Function, fmt.Sprintf("%s:%d", filepath.Base(file), line)
+		},
+	})
+
+	go handleSIGUSR2(logger)
+	return logger
 }
 
 func handleSIGUSR2(logger *logrus.Logger) {
