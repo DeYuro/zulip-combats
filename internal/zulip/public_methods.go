@@ -34,7 +34,7 @@ func (b *Bot) RegisterEventQueuePrivate() (*Queue, error) {
 	return b.RegisterEventQueue(nil, NarrowPrivate)
 }
 
-func (b *Bot) RegisterEventQueue(eventList []EventType, narrow Narrow) (*Queue, error) {
+func (b *Bot) RegisterEventQueue(eventList []RegisterEventType, narrow Narrow) (*Queue, error) {
 	resp, err := b.registerEventQueue(eventList, narrow)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (b *Bot) RegisterEventQueue(eventList []EventType, narrow Narrow) (*Queue, 
 	return &queue, nil
 }
 
-func (b *Bot) GetEvents() ([]EventMessage, error) {
+func (b *Bot) GetEvents() ([]Event, error) {
 	resp, err := b.rawGetEvents()
 	if err != nil {
 		return nil, err
@@ -68,46 +68,73 @@ func (b *Bot) GetEvents() ([]EventMessage, error) {
 		return nil, err
 	}
 
-	msgs, err := b.parseEventMessages(body)
 	if err != nil {
 		return nil, err
 	}
 
-	return msgs, nil
+	events, err := b.parseEventMessages(body)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
 }
 
-func (b *Bot) parseEventMessages(rawEventResponse []byte) ([]EventMessage, error) {
+func (b *Bot) parseEventMessages(body []byte) ([]Event, error) {
 	rawResponse := map[string]json.RawMessage{}
-	err := json.Unmarshal(rawEventResponse, &rawResponse)
+	err := json.Unmarshal(body, &rawResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	events := []map[string]json.RawMessage{}
-	err = json.Unmarshal(rawResponse["events"], &events)
+	rawEvents := []map[string]json.RawMessage{}
+	err = json.Unmarshal(rawResponse["events"], &rawEvents)
 	if err != nil {
 		return nil, err
 	}
 
-	messages := []EventMessage{}
+	var eventType string
+
+	err = json.Unmarshal(rawEvents[0]["type"], &eventType)
+	if err != nil {
+		return nil, err
+	}
+
+	var events []Event
+
 	newLastEventID := 0
-	for _, event := range events {
-		// Todo parse all Event then other
+	for _, rawEvent := range rawEvents {
+
+		var eventType QueueEventType
+
+		json.Unmarshal(rawEvent["type"], &eventType)
 		var id int
-		json.Unmarshal(event["id"], &id)
-		if id > newLastEventID {
-			newLastEventID = id
+		json.Unmarshal(rawEvent["id"], &id)
+
+		event := Event{
+			Type: eventType,
+			ID:   id,
+		}
+
+		if event.ID > newLastEventID {
+			newLastEventID = event.ID
+		}
+		if event.Type != MessageQueueType {
+			events = append(events, event)
+			continue
 		}
 
 		var msg EventMessage
-		err = json.Unmarshal(event["message"], &msg)
+
+		err = json.Unmarshal(rawEvent["message"], &msg)
 		if err != nil {
 			return nil, err
 		}
-		messages = append(messages, msg)
+		event.Message = msg
+		events = append(events, event)
 	}
 
 	b.queue.LastEventID = newLastEventID
 
-	return messages, nil
+	return events, nil
 }
