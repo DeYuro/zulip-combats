@@ -20,3 +20,18 @@ func (s *Service) Run() error {
 
 	return nil
 }
+
+func runAction[T Action](action T) {
+	T.run()
+}
+
+func getAction[T Action](e zulip.EventMessage) T {
+	var action T
+	switch e.Content {
+	case "/help":
+		Action(Help{message: e}).(T)
+		return action
+	default:
+		return Skip{message: e}
+	}
+}
