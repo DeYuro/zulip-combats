@@ -1,32 +1,36 @@
 package service
 
-import "github.com/deyuro/zulip-combats/internal/zulip"
+import (
+	"github.com/deyuro/zulip-combats/internal/zulip"
+	"github.com/sirupsen/logrus"
+)
 
 type Action interface {
 	Help | Skip
-	create() Action
 	run()
 }
-type Skip struct {
+
+type Base struct {
+	bot     *zulip.Bot
 	message zulip.EventMessage
+	logger  logrus.FieldLogger
+}
+type Skip struct {
+	Base
 }
 
 type Help struct {
-	message zulip.EventMessage
+	Base
 }
 
-func (h *Help) create() Action {
-	//TODO implement me
-	panic("implement me")
+func (h Help) run() {
+	h.logger.Info("TODO HELP TO PRIVATE")
 }
 
-func (h *Help) run() {
-	println(h.message.SenderFullName)
+func (s Skip) run() {
+	s.logger.WithField("content", s.message.Type).Info("skipped")
 }
 
-func (s *Skip) run() {
-}
-
-func ()()  {
-	
+func runAction[T Action](action T) {
+	action.run()
 }

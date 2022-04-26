@@ -1,13 +1,17 @@
 package service
 
-import "github.com/deyuro/zulip-combats/internal/zulip"
+import (
+	"github.com/deyuro/zulip-combats/internal/zulip"
+	"github.com/sirupsen/logrus"
+)
 
 type Service struct {
-	bot *zulip.Bot
+	bot    *zulip.Bot
+	logger logrus.FieldLogger
 }
 
-func NewService(bot *zulip.Bot) *Service {
-	return &Service{bot: bot}
+func NewService(bot *zulip.Bot, logger logrus.FieldLogger) *Service {
+	return &Service{bot: bot, logger: logger}
 }
 
 func (s *Service) Run() error {
@@ -15,23 +19,23 @@ func (s *Service) Run() error {
 	c, cancel := s.bot.GetEventChan()
 	defer cancel()
 	for e := range c {
-		println(e.Content)
+		s.execute(e)
 	}
 
 	return nil
 }
 
-func runAction[T Action](action T) {
-	T.run()
-}
+func (s Service) execute(message zulip.EventMessage) {
 
-func getAction[T Action](e zulip.EventMessage) T {
-	var action T
-	switch e.Content {
+	base := Base{
+		bot:     s.bot,
+		message: message,
+		logger:  s.logger,
+	}
+	switch message.Content {
 	case "/help":
-		Action(Help{message: e}).(T)
-		return action
+		runAction(Help{base})
 	default:
-		return Skip{message: e}
+		runAction(Skip{base})
 	}
 }
