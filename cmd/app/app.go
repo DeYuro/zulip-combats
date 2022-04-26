@@ -39,7 +39,7 @@ func app() error {
 	}()
 
 	go func() {
-		errChan <- run(cancel, bot)
+		errChan <- run(cancel, bot, logger)
 	}()
 	select {
 	case err := <-errChan:
@@ -49,7 +49,7 @@ func app() error {
 	}
 }
 
-func run(cancel context.CancelFunc, bot *zulip.Bot) error {
+func run(cancel context.CancelFunc, bot *zulip.Bot, logger logrus.FieldLogger) error {
 
 	q, err := bot.RegisterEventQueuePrivate()
 	if err != nil {
@@ -57,7 +57,7 @@ func run(cancel context.CancelFunc, bot *zulip.Bot) error {
 	}
 	bot.SetQueue(q)
 
-	src := service.NewService(bot)
+	src := service.NewService(bot, logger)
 
 	err = src.Run()
 
