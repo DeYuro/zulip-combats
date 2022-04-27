@@ -80,6 +80,15 @@ func (b *Bot) GetEvents() ([]Event, error) {
 	return events, nil
 }
 
+func (b *Bot) SendPrivateMessage(content, email string) {
+	m := Message{
+		Emails:  []string{email},
+		Content: content,
+	}
+
+	b.sendPrivateMessage(m)
+}
+
 func (b *Bot) parseEventMessages(body []byte) ([]Event, error) {
 	rawResponse := map[string]json.RawMessage{}
 	err := json.Unmarshal(body, &rawResponse)
