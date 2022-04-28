@@ -57,3 +57,47 @@ func (b *Bot) rawGetEvents() (*http.Response, error) {
 
 	return b.client.Do(req)
 }
+
+func (b *Bot) sendPrivateMessage(m Message) (*http.Response, error) {
+	if len(m.Emails) == 0 {
+		return nil, fmt.Errorf("there must be at least one recipient")
+	}
+	req, err := b.constructMessageRequest(m)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.client.Do(req)
+}
+
+func (b *Bot) constructMessageRequest(m Message) (*http.Request, error) {
+	to := m.Stream
+	mtype := "stream"
+
+	le := len(m.Emails)
+	if le != 0 {
+		mtype = "private"
+	}
+	if le == 1 {
+		to = m.Emails[0]
+	}
+	if le > 1 {
+		to = ""
+		for i, e := range m.Emails {
+			to += e
+			if i != le-1 {
+				to += ","
+			}
+		}
+	}
+
+	values := url.Values{}
+	values.Set("type", mtype)
+	values.Set("to", to)
+	values.Set("content", m.Content)
+	if mtype == "stream" {
+		values.Set("subject", m.Topic)
+	}
+
+	return b.request(POST, "messages", values.Encode())
+}

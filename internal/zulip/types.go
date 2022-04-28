@@ -60,6 +60,13 @@ type Event struct {
 	Message EventMessage
 }
 
+type Message struct {
+	Stream  string
+	Topic   string
+	Emails  []string
+	Content string
+}
+
 type EventMessage struct {
 	AvatarURL       string        `json:"avatar_url,omitempty"`
 	Client          string        `json:"client,omitempty"`
