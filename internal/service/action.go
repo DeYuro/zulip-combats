@@ -24,7 +24,7 @@ type Help struct {
 }
 
 func (h Help) run() {
-	h.logger.Info("TODO HELP TO PRIVATE")
+	h.bot.SendPrivateMessage(HELP, h.message.SenderEmail)
 }
 
 func (s Skip) run() {
