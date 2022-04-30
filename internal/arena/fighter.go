@@ -12,7 +12,11 @@ type Fighter[HP constraints.Integer] interface {
 	restoreHP()
 }
 
-type Human[HP constraints.Integer] struct {
+type HealthPoint interface {
+	constraints.Integer
+}
+
+type Human[HP HealthPoint] struct {
 	HealthPoint   HP
 	MaxHP         HP
 	RestoreHpStep HP
@@ -36,17 +40,22 @@ type AI[HP constraints.Integer] struct {
 	MaxHP       HP
 }
 
-func (a *AI[HP]) getHP() HP {
+func (a AI[HP]) getHP() HP {
 	return a.getHP()
 }
 
-func (a *AI[HP]) restoreHP() {
+func (a AI[HP]) restoreHP() {
 	a.HealthPoint = a.MaxHP
 }
 
-func createFighter[HP constraints.Integer](fighterType FighterType, maxHp, restoreStep HP) (Fighter, error) {
+func createFighter[HP HealthPoint](fighterType FighterType, maxHp, restoreStep HP) (Fighter, error) {
 	switch fighterType {
 	case ai:
-		return
+		return AI{
+			HealthPoint: maxHp,
+			MaxHP:       maxHp,
+		}, nil
+	case human:
+		return Human{MaxHP: }
 	}
 }
