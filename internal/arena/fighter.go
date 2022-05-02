@@ -1,61 +1,89 @@
 package arena
 
-import "golang.org/x/exp/constraints"
+import (
+	"errors"
+)
 
 type FighterType string
 
-const human FighterType = "human"
-const ai FighterType = "ai"
+const (
+	human FighterType = "human"
+	ai    FighterType = "ai"
+)
 
-type Fighter[HP constraints.Integer] interface {
-	getHP() HP
-	restoreHP()
+type HeathPoint interface {
+	~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uint
 }
 
-type HealthPoint interface {
-	constraints.Integer
+type Fighter[HP HeathPoint] interface {
+	getHp() HP
+	restoreHp()
+	takeDamage(damage HP)
 }
 
-type Human[HP HealthPoint] struct {
-	HealthPoint   HP
-	MaxHP         HP
-	RestoreHpStep HP
+//Human value type receiver methods
+type Human[HP HeathPoint] struct {
+	Hp          HP
+	MaxHp       HP
+	RestoreStep HP
 }
 
-func (h Human[HP]) getHP() HP {
-	return h.getHP()
-
+func (h Human[HP]) getHp() HP {
+	return h.Hp
 }
 
-func (h Human) restoreHP() {
-	if (h.HealthPoint + h.RestoreHpStep) < h.MaxHP {
-		h.HealthPoint = h.MaxHP
+func (h Human[HP]) restoreHp() {
+	if h.MaxHp < (h.Hp + h.RestoreStep) {
+		h.Hp += h.RestoreStep
 	}
 
-	h.HealthPoint += h.RestoreHpStep
+	h.Hp = h.MaxHp
 }
 
-type AI[HP constraints.Integer] struct {
-	HealthPoint HP
-	MaxHP       HP
+func (h Human[HP]) takeDamage(damage HP) {
+	if (h.Hp - damage) < 0 {
+		h.Hp = 0
+	}
+
+	h.Hp -= damage
 }
 
-func (a AI[HP]) getHP() HP {
-	return a.getHP()
+// AI pointer type receiver methods
+type AI[HP HeathPoint] struct {
+	Hp    HP
+	MaxHp HP
 }
 
-func (a AI[HP]) restoreHP() {
-	a.HealthPoint = a.MaxHP
+func (a *AI[HP]) getHp() HP {
+	return a.Hp
 }
 
-func createFighter[HP HealthPoint](fighterType FighterType, maxHp, restoreStep HP) (Fighter, error) {
+func (a *AI[HP]) restoreHp() {
+	a.Hp = a.MaxHp
+}
+
+func (a *AI[HP]) takeDamage(damage HP) {
+	if (a.Hp - damage) < 0 {
+		a.Hp = 0
+	}
+
+	a.Hp -= damage
+}
+
+func createFighter[HP HeathPoint](fighterType FighterType, maxHp, restoreStep HP) (Fighter[HP], error) {
 	switch fighterType {
-	case ai:
-		return AI{
-			HealthPoint: maxHp,
-			MaxHP:       maxHp,
-		}, nil
 	case human:
-		return Human{MaxHP: }
+		return &Human[HP]{
+			Hp:          maxHp,
+			MaxHp:       maxHp,
+			RestoreStep: restoreStep,
+		}, nil
+	case ai:
+		return &AI[HP]{
+			Hp:    maxHp,
+			MaxHp: maxHp,
+		}, nil
 	}
+
+	return nil, errors.New("wrong type")
 }
