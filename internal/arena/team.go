@@ -1,5 +1,5 @@
 package arena
 
 type Team struct {
-	Members []Fighter
+	Members []Fighter[uint]
 }

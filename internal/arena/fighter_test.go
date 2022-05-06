@@ -5,40 +5,50 @@ import (
 	"testing"
 )
 
-func TestCreateFighter[HP HeathPoint](t *testing.T) {
-	type expect[HP HeathPoint] struct {
-		result Fighter[HP]
-		error  string
-	}
+type CreateFighterTest struct {
+	name        string
+	fighterType FighterType
+	maxHp       uint
+	restoreStep uint
+	expect      expect
+}
 
-	type test struct {
-		FighterType FighterType
-		maxHp       uint
-		restoreStep uint
-		expect      expect
-	}
+type expect struct {
+	result Fighter[uint]
+	error  string
+}
 
-	testCases := []test{
+func getTestcases() []CreateFighterTest {
+	return []CreateFighterTest{
 		{
-			`human`,
-			100,
-			20,
-			expect{
+			name:        `create human`,
+			fighterType: `human`,
+			maxHp:       100,
+			restoreStep: 20,
+			expect: expect{
 				error: "",
-				result: Human[HP]{
-					100,
-					100,
-					20,
+				result: &Human[uint]{
+					Hp:          100,
+					MaxHp:       100,
+					RestoreStep: 20,
 				},
 			},
 		},
 	}
+}
 
-	t.Run("create", func(t *testing.T) {
-		for _, v := range testCases {
-			f, err := createFighter(v.FighterType, v.maxHp, v.restoreStep)
-			assert.Equal(t, v.expect.result, f)
-			assert.NoError(t, err)
-		}
-	})
+func TestCreateFighter(t *testing.T) {
+	tests := getTestcases()
+
+	for _, tc := range tests {
+		t.Run(tc.name, runCreateFighterTestCases(tc))
+	}
+}
+
+func runCreateFighterTestCases(tc CreateFighterTest) func(t *testing.T) {
+	return func(t *testing.T) {
+		f, err := createFighter(tc.fighterType, tc.maxHp, tc.restoreStep)
+		assert.Equal(t, tc.expect.result, f)
+		assert.NoError(t, err)
+	}
 }
