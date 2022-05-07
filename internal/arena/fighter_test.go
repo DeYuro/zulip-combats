@@ -34,6 +34,15 @@ func getTestcases() []CreateFighterTest {
 				},
 			},
 		},
+		{
+			name:        `wrong type`,
+			fighterType: `cyborg`,
+			maxHp:       100,
+			restoreStep: 20,
+			expect: expect{
+				error: "wrong type",
+			},
+		},
 	}
 }
 
@@ -49,6 +58,10 @@ func runCreateFighterTestCases(tc CreateFighterTest) func(t *testing.T) {
 	return func(t *testing.T) {
 		f, err := createFighter(tc.fighterType, tc.maxHp, tc.restoreStep)
 		assert.Equal(t, tc.expect.result, f)
-		assert.NoError(t, err)
+		if tc.expect.error == "" {
+			assert.NoError(t, err)
+		} else {
+			assert.Error(t, err)
+		}
 	}
 }
