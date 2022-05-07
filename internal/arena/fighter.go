@@ -28,11 +28,11 @@ type Human[HP HeathPoint] struct {
 	RestoreStep HP
 }
 
-func (h Human[HP]) getHp() HP {
+func (h *Human[HP]) getHp() HP {
 	return h.Hp
 }
 
-func (h Human[HP]) restoreHp() {
+func (h *Human[HP]) restoreHp() {
 	if h.MaxHp < (h.Hp + h.RestoreStep) {
 		h.Hp += h.RestoreStep
 	}
@@ -40,7 +40,7 @@ func (h Human[HP]) restoreHp() {
 	h.Hp = h.MaxHp
 }
 
-func (h Human[HP]) takeDamage(damage HP) {
+func (h *Human[HP]) takeDamage(damage HP) {
 	if (h.Hp - damage) < 0 {
 		h.Hp = 0
 	}
