@@ -1,4 +1,4 @@
-package arena
+package figther
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -35,6 +35,19 @@ func getTestcases() []CreateFighterTest {
 			},
 		},
 		{
+			name:        `create ai`,
+			fighterType: `ai`,
+			maxHp:       100,
+			restoreStep: 0,
+			expect: expect{
+				error: "",
+				result: &AI[uint]{
+					Hp:    100,
+					MaxHp: 100,
+				},
+			},
+		},
+		{
 			name:        `wrong type`,
 			fighterType: `cyborg`,
 			maxHp:       100,
@@ -64,4 +77,8 @@ func runCreateFighterTestCases(tc CreateFighterTest) func(t *testing.T) {
 			assert.EqualError(t, err, tc.expect.error)
 		}
 	}
+}
+
+func TestGetHp(t *testing.T) {
+
 }
