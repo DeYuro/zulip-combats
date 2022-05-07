@@ -61,7 +61,7 @@ func runCreateFighterTestCases(tc CreateFighterTest) func(t *testing.T) {
 		if tc.expect.error == "" {
 			assert.NoError(t, err)
 		} else {
-			assert.Error(t, err)
+			assert.EqualError(t, err, tc.expect.error)
 		}
 	}
 }
