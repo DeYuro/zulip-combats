@@ -12,7 +12,7 @@ const (
 )
 
 type HeathPoint interface {
-	~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uint
+	~int8 | ~int16 | ~int32 | ~int64 | ~int
 }
 
 type Fighter[HP HeathPoint] interface {
@@ -43,6 +43,7 @@ func (h *Human[HP]) restoreHp() {
 func (h *Human[HP]) takeDamage(damage HP) {
 	if (h.Hp - damage) < 0 {
 		h.Hp = 0
+		return
 	}
 
 	h.Hp -= damage
@@ -65,6 +66,7 @@ func (a *AI[HP]) restoreHp() {
 func (a *AI[HP]) takeDamage(damage HP) {
 	if (a.Hp - damage) < 0 {
 		a.Hp = 0
+		return
 	}
 
 	a.Hp -= damage
