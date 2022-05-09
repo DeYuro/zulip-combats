@@ -42,3 +42,9 @@ turres, voce, caede et? Restet
 [oriens](http://www.quodquegementis.net/huc-esse), sputantem ingenio triplicis;
 gratia tu fractae. Calcataque nullam, Haec illas umeroque fodiebant tenentes,
 est.`
+
+const TEST = `
+/poll Tea or coffee?
+kkoko
+koko
+`

@@ -6,7 +6,7 @@ import (
 )
 
 type Action interface {
-	Help | Skip
+	Help | Skip | Test
 	run()
 }
 
@@ -22,9 +22,16 @@ type Skip struct {
 type Help struct {
 	Base
 }
+type Test struct {
+	Base
+}
 
 func (h Help) run() {
 	h.bot.SendPrivateMessage(HELP, h.message.SenderEmail)
+}
+
+func (t Test) run() {
+	t.bot.SendPrivateMessage(TEST, t.message.SenderEmail)
 }
 
 func (s Skip) run() {

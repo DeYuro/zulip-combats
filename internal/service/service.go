@@ -35,6 +35,8 @@ func (s Service) execute(message zulip.EventMessage) {
 	switch message.Content {
 	case "/help":
 		runAction(Help{base})
+	case "/test":
+		runAction(Test{base})
 	default:
 		runAction(Skip{base})
 	}
