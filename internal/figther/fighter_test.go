@@ -151,7 +151,7 @@ func runTestGetHP[HP HeathPoint](tc testGetHP[HP]) func(t *testing.T) {
 	}
 }
 
-type testTakeDamage[HP HeathPoint] struct {
+type testMethodsHP[HP HeathPoint] struct {
 	name              string
 	fighterCreateData fighterCreateData[HP]
 	damage            HP
@@ -159,7 +159,7 @@ type testTakeDamage[HP HeathPoint] struct {
 }
 
 func TestTakeDamage(t *testing.T) {
-	testsUint := []testTakeDamage[int]{
+	testsUint := []testMethodsHP[int]{
 		{
 			name: `human int takeDamage`,
 			fighterCreateData: fighterCreateData[int]{
@@ -181,7 +181,7 @@ func TestTakeDamage(t *testing.T) {
 			expect: 0,
 		},
 	}
-	testsUint32 := []testTakeDamage[int32]{
+	testsUint32 := []testMethodsHP[int32]{
 		{
 			name: `human int32 takeDamage`,
 			fighterCreateData: fighterCreateData[int32]{
@@ -213,12 +213,78 @@ func TestTakeDamage(t *testing.T) {
 	}
 }
 
-func runTestTakeDamage[HP HeathPoint](tc testTakeDamage[HP]) func(t *testing.T) {
+func runTestTakeDamage[HP HeathPoint](tc testMethodsHP[HP]) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 		f, err := createFighter(tc.fighterCreateData.fighterType, tc.fighterCreateData.maxHp, tc.fighterCreateData.restoreStep)
 		assert.NoError(t, err)
 		f.takeDamage(tc.damage)
+		assert.Equal(t, tc.expect, f.getHp())
+	}
+}
+
+func TestRestoreHP(t *testing.T) {
+	testsUint64 := []testMethodsHP[int64]{
+		{
+			name: `human int64 restoreHP`,
+			fighterCreateData: fighterCreateData[int64]{
+				fighterType: `human`,
+				maxHp:       120,
+				restoreStep: 10,
+			},
+			damage: 30,
+			expect: 100,
+		},
+		{
+			name: `ai int64 restoreHP`,
+			fighterCreateData: fighterCreateData[int64]{
+				fighterType: `ai`,
+				maxHp:       120,
+				restoreStep: 12,
+			},
+			damage: 100,
+			expect: 120,
+		},
+	}
+	testsUint8 := []testMethodsHP[int8]{
+		{
+			name: `human int8 takeDamage`,
+			fighterCreateData: fighterCreateData[int8]{
+				fighterType: `human`,
+				maxHp:       30,
+				restoreStep: 20,
+			},
+			damage: 1,
+			expect: 30,
+		},
+		{
+			name: `ai int8 takeDamage`,
+			fighterCreateData: fighterCreateData[int8]{
+				fighterType: `ai`,
+				maxHp:       100,
+				restoreStep: 0,
+			},
+			damage: 50,
+			expect: 100,
+		},
+	}
+
+	for _, tc := range testsUint64 {
+		t.Run(tc.name, runTestRestoreHP(tc))
+	}
+
+	for _, tc := range testsUint8 {
+		t.Run(tc.name, runTestRestoreHP(tc))
+	}
+}
+
+func runTestRestoreHP[HP HeathPoint](tc testMethodsHP[HP]) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Parallel()
+		f, err := createFighter(tc.fighterCreateData.fighterType, tc.fighterCreateData.maxHp, tc.fighterCreateData.restoreStep)
+		assert.NoError(t, err)
+		f.takeDamage(tc.damage)
+		f.restoreHp()
 		assert.Equal(t, tc.expect, f.getHp())
 	}
 }
