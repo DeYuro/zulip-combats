@@ -33,8 +33,9 @@ func (h *Human[HP]) getHp() HP {
 }
 
 func (h *Human[HP]) restoreHp() {
-	if h.MaxHp < (h.Hp + h.RestoreStep) {
+	if h.MaxHp > (h.Hp + h.RestoreStep) {
 		h.Hp += h.RestoreStep
+		return
 	}
 
 	h.Hp = h.MaxHp
