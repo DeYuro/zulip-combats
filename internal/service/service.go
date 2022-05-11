@@ -25,6 +25,10 @@ func (s *Service) Run() error {
 	return nil
 }
 
+func initState() {
+	 
+}
+
 func (s Service) execute(message zulip.EventMessage) {
 
 	base := Base{

@@ -44,7 +44,7 @@ gratia tu fractae. Calcataque nullam, Haec illas umeroque fodiebant tenentes,
 est.`
 
 const TEST = `
-/poll Tea or coffee?
-kkoko
-koko
+Test
 `
+
+const FIGHT = ``
