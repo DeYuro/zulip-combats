@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/deyuro/zulip-combats/internal/zulip"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -52,11 +51,11 @@ func runAction[T Action](action T) {
 	action.run()
 }
 
-func (b Base) getState() (state, error) {
-	s, ok := states[b.message.SenderEmail];
-	if !ok {
-		return s, errors.New("")
-	}
-
-	return s, nil
-}
+//func (b Base) getState() (state, error) {
+//	s, ok := states[b.message.SenderEmail];
+//	if !ok {
+//		return s, errors.New("")
+//	}
+//
+//	return s, nil
+//}
