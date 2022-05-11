@@ -19,10 +19,16 @@ type Bot struct {
 	Key   string `required:"true" yaml:"key"`
 }
 
-func Load(filename string) (Config, error) {
+const containerName = `config`
+
+func GetContainerName() string {
+	return containerName
+}
+
+func NewConfig(filename string) (*Config, error) {
 	var config Config
 	if err := configor.Load(&config, filename); err != nil {
-		return Config{}, errors.WithMessage(err, "failed to load config")
+		return nil, errors.WithMessage(err, "failed to load config")
 	}
-	return config, nil
+	return &config, nil
 }

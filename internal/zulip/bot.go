@@ -1,6 +1,7 @@
 package zulip
 
 import (
+	"github.com/deyuro/zulip-combats/internal/config"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
@@ -15,16 +16,22 @@ type Bot struct {
 	logger     logrus.FieldLogger
 }
 
+const containerName = `zulip_bot`
+
+func GetContainerName() string {
+	return containerName
+}
+
 func (b *Bot) SetQueue(queue *Queue) {
 	b.queue = queue
 }
 
-func NewBot(email string, key string, entrypoint string, client Doer, logger logrus.FieldLogger) *Bot {
+func NewBot(config *config.Config, logger logrus.FieldLogger) *Bot {
 	bot := &Bot{
-		email:      email,
-		key:        key,
-		entrypoint: entrypoint,
-		client:     client,
+		email:      config.Zulip.Bot.Email,
+		key:        config.Zulip.Bot.Key,
+		entrypoint: config.Zulip.Entrypoint,
+		client:     &http.Client{},
 		logger:     logger,
 	}
 	return bot

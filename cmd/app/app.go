@@ -5,11 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/deyuro/zulip-combats/internal/config"
+	"github.com/deyuro/zulip-combats/internal/logger"
 	"github.com/deyuro/zulip-combats/internal/service"
 	"github.com/deyuro/zulip-combats/internal/zulip"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/http"
+	"go.uber.org/dig"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -18,20 +18,20 @@ import (
 )
 
 func app() error {
+	container := buildContainer()
 
-	var cfgFile string
+	var bot *zulip.Bot
+	var logger *logrus.Logger
+	err := container.Invoke(func(l *logrus.Logger) {
+		logger = l
+	})
 
-	flag.StringVar(&cfgFile, "config", "config.yml", "config file path")
-	flag.Parse()
-
-	cfg, err := config.Load(cfgFile)
 	if err != nil {
-		return errors.WithMessage(err, "failed to load configuration")
+		panic(err)
 	}
 
 	appCtx, cancel := context.WithCancel(context.Background())
-	logger := setupLogger()
-	bot := zulip.NewBot(cfg.Zulip.Bot.Email, cfg.Zulip.Bot.Key, cfg.Zulip.Entrypoint, &http.Client{}, logger)
+
 	errChan := make(chan error)
 	go func() {
 		handleSIGINT()
@@ -110,4 +110,27 @@ func handleSIGINT() {
 		signal.Stop(sigCh)
 		return
 	}
+}
+
+func buildContainer() *dig.Container {
+	var cfgFile string
+
+	flag.StringVar(&cfgFile, "config", "config.yml", "config file path")
+	flag.Parse()
+
+	c := dig.New()
+	err := c.Provide(logger.NewLogger)
+	if err != nil {
+		panic(err)
+	}
+	err = c.Provide(func(path string) (*config.Config, error) {
+		return config.NewConfig(path)
+	})
+
+	if err != nil {
+		panic(err)
+	}
+	err = c.Provide(zulip.NewBot)
+
+	return c
 }
