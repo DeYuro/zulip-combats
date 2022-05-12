@@ -10,13 +10,9 @@ import (
 	"syscall"
 )
 
-const containerName = `logger`
+type AppLogger logrus.FieldLogger
 
-func GetContainerName() string {
-	return containerName
-}
-
-func NewLogger() *logrus.Logger {
+func NewLogger() AppLogger {
 	logger := logrus.New()
 	logger.ReportCaller = false
 

@@ -5,6 +5,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+type BotConfig interface {
+}
+
 type Config struct {
 	Zulip Service `required:"true" yaml:"zulip"`
 }
@@ -17,12 +20,6 @@ type Service struct {
 type Bot struct {
 	Email string `required:"true" yaml:"email"`
 	Key   string `required:"true" yaml:"key"`
-}
-
-const containerName = `config`
-
-func GetContainerName() string {
-	return containerName
 }
 
 func NewConfig(filename string) (*Config, error) {
