@@ -6,12 +6,15 @@ import (
 )
 
 type Service struct {
-	bot    *zulip.Bot
+	bot    zulip.BotInterface
 	logger logger.AppLogger
 }
 
-func NewService(bot *zulip.Bot, logger logger.AppLogger) *Service {
-	return &Service{bot: bot, logger: logger}
+func NewService(bot zulip.BotInterface, logger logger.AppLogger) *Service {
+	return &Service{
+		bot:    bot,
+		logger: logger,
+	}
 }
 
 func (s *Service) Run() error {
@@ -27,10 +30,6 @@ func (s *Service) Run() error {
 	}
 
 	return nil
-}
-
-func initState() {
-
 }
 
 func (s Service) execute(message zulip.EventMessage) {

@@ -11,7 +11,7 @@ type Action interface {
 }
 
 type Base struct {
-	bot     *zulip.Bot
+	bot     zulip.BotInterface
 	message zulip.EventMessage
 	logger  logrus.FieldLogger
 }
