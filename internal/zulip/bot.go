@@ -2,10 +2,20 @@ package zulip
 
 import (
 	"github.com/deyuro/zulip-combats/internal/config"
-	"github.com/sirupsen/logrus"
+	"github.com/deyuro/zulip-combats/internal/logger"
 	"net/http"
 	"strings"
 )
+
+type BotInterface interface {
+	GetEventChan() (chan EventMessage, func())
+	GetStreams() ([]string, error)
+	RegisterEventQueuePrivate() (*Queue, error)
+	RegisterEventQueue(eventList []RegisterEventType, narrow Narrow) (*Queue, error)
+	GetEvents() ([]Event, error)
+	SendPrivateMessage(content, email string)
+	SetQueue(queue *Queue)
+}
 
 type Bot struct {
 	email      string // Login for basic auth
@@ -13,24 +23,18 @@ type Bot struct {
 	entrypoint string
 	client     Doer
 	queue      *Queue
-	logger     logrus.FieldLogger
-}
-
-const containerName = `zulip_bot`
-
-func GetContainerName() string {
-	return containerName
+	logger     logger.AppLogger
 }
 
 func (b *Bot) SetQueue(queue *Queue) {
 	b.queue = queue
 }
 
-func NewBot(config *config.Config, logger logrus.FieldLogger) *Bot {
+func NewBot(config config.BotConfiger, logger logger.AppLogger) *Bot {
 	bot := &Bot{
-		email:      config.Zulip.Bot.Email,
-		key:        config.Zulip.Bot.Key,
-		entrypoint: config.Zulip.Entrypoint,
+		email:      config.GetEmail(),
+		key:        config.GetKey(),
+		entrypoint: config.GetEntrypoint(),
 		client:     &http.Client{},
 		logger:     logger,
 	}

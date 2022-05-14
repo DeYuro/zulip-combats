@@ -1,21 +1,28 @@
 package service
 
 import (
+	"github.com/deyuro/zulip-combats/internal/logger"
 	"github.com/deyuro/zulip-combats/internal/zulip"
-	"github.com/sirupsen/logrus"
 )
 
 type Service struct {
-	bot    *zulip.Bot
-	logger logrus.FieldLogger
+	bot    zulip.BotInterface
+	logger logger.AppLogger
 }
 
-func NewService(bot *zulip.Bot, logger logrus.FieldLogger) *Service {
-	return &Service{bot: bot, logger: logger}
+func NewService(bot zulip.BotInterface, logger logger.AppLogger) *Service {
+	return &Service{
+		bot:    bot,
+		logger: logger,
+	}
 }
 
 func (s *Service) Run() error {
-
+	q, err := s.bot.RegisterEventQueuePrivate()
+	if err != nil {
+		return err
+	}
+	s.bot.SetQueue(q)
 	c, cancel := s.bot.GetEventChan()
 	defer cancel()
 	for e := range c {
@@ -23,10 +30,6 @@ func (s *Service) Run() error {
 	}
 
 	return nil
-}
-
-func initState() {
-	 
 }
 
 func (s Service) execute(message zulip.EventMessage) {

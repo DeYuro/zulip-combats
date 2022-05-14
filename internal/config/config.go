@@ -5,24 +5,51 @@ import (
 	"github.com/pkg/errors"
 )
 
+type BotConfiger interface {
+	GetEmail() string
+	GetKey() string
+	GetEntrypoint() string
+}
+type ServiceConfiger interface {
+	GetBotConfig() BotConfiger
+}
+
+type AppConfiger interface {
+	getService() ServiceConfiger
+}
+
 type Config struct {
-	Zulip Service `required:"true" yaml:"zulip"`
+	Service Service `required:"true" yaml:"zulip"`
+}
+
+func (c Config) getService() ServiceConfiger {
+	return c.Service
 }
 
 type Service struct {
-	Bot        Bot    `required:"true" yaml:"bot"`
-	Entrypoint string `required:"true" yaml:"entrypoint"`
+	Bot Bot `required:"true" yaml:"bot"`
+}
+
+func (s Service) GetBotConfig() BotConfiger {
+	return s.Bot
 }
 
 type Bot struct {
-	Email string `required:"true" yaml:"email"`
-	Key   string `required:"true" yaml:"key"`
+	Email      string `required:"true" yaml:"email"`
+	Key        string `required:"true" yaml:"key"`
+	Entrypoint string `required:"true" yaml:"entrypoint"`
 }
 
-const containerName = `config`
+func (b Bot) GetEntrypoint() string {
+	return b.Entrypoint
+}
 
-func GetContainerName() string {
-	return containerName
+func (b Bot) GetEmail() string {
+	return b.Email
+}
+
+func (b Bot) GetKey() string {
+	return b.Key
 }
 
 func NewConfig(filename string) (*Config, error) {
