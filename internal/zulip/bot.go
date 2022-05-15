@@ -26,15 +26,18 @@ type Bot struct {
 	logger     logger.AppLogger
 }
 
+func BindBotInterface(b *Bot) BotInterface {
+	return b
+}
+
 func (b *Bot) SetQueue(queue *Queue) {
 	b.queue = queue
 }
-
-func NewBot(config config.BotConfiger, logger logger.AppLogger) *Bot {
+func NewBot(config config.Configurator, logger logger.AppLogger) *Bot {
 	bot := &Bot{
-		email:      config.GetEmail(),
-		key:        config.GetKey(),
-		entrypoint: config.GetEntrypoint(),
+		email:      config.GetService().Bot.Email,
+		key:        config.GetService().Bot.Key,
+		entrypoint: config.GetService().Bot.Entrypoint,
 		client:     &http.Client{},
 		logger:     logger,
 	}

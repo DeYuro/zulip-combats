@@ -2,11 +2,8 @@ package main
 
 import (
 	"context"
-	"flag"
-	"github.com/deyuro/zulip-combats/internal/config"
-	"github.com/deyuro/zulip-combats/internal/logger"
+	"github.com/deyuro/zulip-combats/internal/di"
 	"github.com/deyuro/zulip-combats/internal/service"
-	"github.com/deyuro/zulip-combats/internal/zulip"
 	"go.uber.org/dig"
 	"os"
 	"os/signal"
@@ -20,7 +17,8 @@ func app() error {
 		cancel()
 	}()
 
-	c, err := buildContainer()
+	c, err := di.BuildContainer()
+
 	if err != nil {
 		return err
 	}
@@ -56,34 +54,4 @@ func handleSIGINT() {
 		signal.Stop(sigCh)
 		return
 	}
-}
-
-func buildContainer() (*dig.Container, error) {
-	var cfgFile string
-
-	flag.StringVar(&cfgFile, "config", "config.yml", "config file path")
-	flag.Parse()
-
-	c := dig.New()
-	err := c.Provide(logger.NewLogger)
-	if err != nil {
-		return nil, err
-	}
-	err = c.Provide(func(path string) (*config.Config, error) {
-		return config.NewConfig(path)
-	})
-	if err != nil {
-		return nil, err
-	}
-	err = c.Provide(zulip.NewBot)
-	if err != nil {
-		return nil, err
-	}
-
-	err = c.Provide(service.NewService)
-	if err != nil {
-		return nil, err
-	}
-
-	return c, nil
 }

@@ -5,33 +5,24 @@ import (
 	"github.com/pkg/errors"
 )
 
-type BotConfiger interface {
-	GetEmail() string
-	GetKey() string
-	GetEntrypoint() string
-}
-type ServiceConfiger interface {
-	GetBotConfig() BotConfiger
+type Configurator interface {
+	GetService() Service
 }
 
-type AppConfiger interface {
-	getService() ServiceConfiger
+func BindConfigurator(s *Config) Configurator {
+	return s
 }
 
 type Config struct {
 	Service Service `required:"true" yaml:"zulip"`
 }
 
-func (c Config) getService() ServiceConfiger {
+func (c Config) GetService() Service {
 	return c.Service
 }
 
 type Service struct {
 	Bot Bot `required:"true" yaml:"bot"`
-}
-
-func (s Service) GetBotConfig() BotConfiger {
-	return s.Bot
 }
 
 type Bot struct {
@@ -40,22 +31,13 @@ type Bot struct {
 	Entrypoint string `required:"true" yaml:"entrypoint"`
 }
 
-func (b Bot) GetEntrypoint() string {
-	return b.Entrypoint
-}
+func NewConfig(filename string) func() (*Config, error) {
 
-func (b Bot) GetEmail() string {
-	return b.Email
-}
-
-func (b Bot) GetKey() string {
-	return b.Key
-}
-
-func NewConfig(filename string) (*Config, error) {
-	var config Config
-	if err := configor.Load(&config, filename); err != nil {
-		return nil, errors.WithMessage(err, "failed to load config")
+	return func() (*Config, error) {
+		var config Config
+		if err := configor.Load(&config, filename); err != nil {
+			return nil, errors.WithMessage(err, "failed to load config")
+		}
+		return &config, nil
 	}
-	return &config, nil
 }
